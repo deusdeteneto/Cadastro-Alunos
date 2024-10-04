@@ -22,6 +22,7 @@ public class CourseController {
         courses.add(new Course(1, "JavaScript"));
         courses.add(new Course(2, "Java"));
         courses.add(new Course(3, "Python"));
+        courses.add(new Course(4, "Angular"));
     }
 
     @GetMapping

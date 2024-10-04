@@ -1,42 +1,55 @@
-//Masks
 $("#inputPhone").mask("(99) 9 9999-9999");
 
-// Função para carregar alunos na tabela
+const coursesMapa = {
+  1: "JavaScript",
+  2: "Java",
+  3: "Angular",
+  4: "Spring",
+};
+
+const periodMapa = {
+  1: "Manhã",
+  2: "Tarde",
+  3: "Noite",
+};
+
+// carregar alunos na tabela
 function carregarAlunos() {
-  axios
-    .get("http://localhost:8080/students")
-    .then((response) => {
-      const alunos = response.data;
+  $.ajax({
+    url: "http://localhost:8080/students",
+    method: "GET",
+    success: function (alunos) {
       const tabela = document.getElementById("alunosTableBody");
       tabela.innerHTML = "";
 
       alunos.forEach((aluno, index) => {
         const novaLinha = tabela.insertRow();
         novaLinha.innerHTML = `
-          <th scope="row">${index + 1}</th>
-          <td>${aluno.name}</td>
-          <td class="col d-none d-md-table-cell">${aluno.email}</td>
-          <td class="col d-none d-md-table-cell">${aluno.phone}</td>
-          <td class="col d-none d-md-table-cell">${
-            aluno.idCurso || "Curso não informado"
-          }</td>
-          <td class="col d-none d-md-table-cell">${
-            aluno.period || "Turno não informado"
-          }</td>
-        `;
+              <th scope="row">${index + 1}</th>
+              <td>${aluno.name}</td>
+              <td class="col d-none d-md-table-cell">${aluno.email}</td>
+              <td class="col d-none d-md-table-cell">${aluno.phone}</td>
+              <td class="col d-none d-md-table-cell">${
+                coursesMapa[aluno.idCurso] || "Curso não informado"
+              }</td>
+              <td class="col d-none d-md-table-cell">${
+                periodMapa[aluno.period] || "Turno não informado"
+              }</td>
+            `;
       });
-    })
-    .catch((error) => {
+    },
+    error: function (error) {
       console.error("Erro ao carregar alunos:", error);
-    });
+    },
+  });
 }
 
-// Função para carregar cursos no select
+// carregar cursos
 function carregarCursos() {
-  axios
-    .get("http://localhost:8080/courses")
-    .then((response) => {
-      const cursos = response.data;
+  $.ajax({
+    url: "http://localhost:8080/courses",
+    method: "GET",
+    success: function (cursos) {
       const selectCurso = document.getElementById("inputCurso");
       selectCurso.innerHTML =
         '<option value="" disabled selected>Selecione o Curso</option>';
@@ -47,19 +60,20 @@ function carregarCursos() {
         option.textContent = curso.name;
         selectCurso.appendChild(option);
       });
-    })
-    .catch((error) => {
+    },
+    error: function (error) {
       console.error("Erro ao carregar cursos:", error);
-    });
+    },
+  });
 }
 
-// Função de inicialização quando a página carregar
+// inicializar a página
 window.onload = function () {
   carregarAlunos();
   carregarCursos();
 };
 
-// Captura o evento de submit do formulário
+// submit do formulário
 document
   .getElementById("formCadastro")
   .addEventListener("submit", function (event) {
@@ -68,7 +82,7 @@ document
     // Captura os valores dos campos do formulário
     const nome = document.getElementById("inputName").value;
     const email = document.getElementById("inputEmail").value;
-    const telefone = document.getElementById("inputPhone").value;
+    const phone = document.getElementById("inputPhone").value;
     const idCurso = document.getElementById("inputCurso").value;
     const period = document.querySelector(
       'input[name="gridRadios"]:checked'
@@ -77,20 +91,35 @@ document
     const novoAluno = {
       name: nome,
       email: email,
-      phone: telefone,
-      idCurso: idCurso, // Verifique se o backend espera `idCurso` ou `courseId`
-      period: period,
+      phone: phone,
+      idCurso: parseInt(idCurso),
+      period: parseInt(period),
     };
 
-    axios
-      .post("http://localhost:8080/students", novoAluno)
-      .then(() => {
-        // Atualiza a tabela com o novo aluno
-        carregarAlunos();
+    $.ajax({
+      url: "http://localhost:8080/students",
+      method: "POST",
+      contentType: "application/json",
+      data: JSON.stringify(novoAluno),
+      success: function (response) {
+        console.log("Aluno salvo com sucesso!", response);
 
-        document.getElementById("formCadastro").reset();
-      })
-      .catch((error) => {
-        console.error("Erro ao salvar aluno:", error);
-      });
+        const tabela = document.getElementById("alunosTableBody");
+        const novaLinha = tabela.insertRow();
+        const novoId = tabela.rows.length + 1;
+
+        novaLinha.innerHTML = `
+              <th scope="row">${novoId}</th>
+              <td>${nome}</td>
+              <td class="col d-none d-md-table-cell">${email}</td>
+              <td class="col d-none d-md-table-cell">${phone}</td>
+              <td class="col d-none d-md-table-cell">${coursesMapa[idCurso]}</td>
+              <td class="col d-none d-md-table-cell">${periodMapa[period]}</td>
+            `;
+      },
+      error: function (error) {
+        console.error("Erro ao cadastrar aluno:", error);
+      },
+    });
+    this.reset();
   });
