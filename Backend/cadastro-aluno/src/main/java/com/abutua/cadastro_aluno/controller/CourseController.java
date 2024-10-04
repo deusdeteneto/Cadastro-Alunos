@@ -15,7 +15,7 @@ public class CourseController {
 
     private List<Course> courses = new ArrayList<>();
     
-    // Cenário necessário para executar os testes
+    // Cenário necessário para executar os testes #Cursos
     public CourseController() {
         courses.add(new Course(1, "JavaScript"));
         courses.add(new Course(2, "Java"));
