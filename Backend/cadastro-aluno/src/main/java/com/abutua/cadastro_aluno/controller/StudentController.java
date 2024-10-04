@@ -3,6 +3,7 @@ package com.abutua.cadastro_aluno.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/students")
+@CrossOrigin
 public class StudentController {
 
     private List<Student> students = new ArrayList<>();
